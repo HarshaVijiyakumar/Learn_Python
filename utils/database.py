@@ -7,7 +7,7 @@ def create_book_table():
     connection = sqlite3.connect('data.db')
     cursor = connection.cursor()
 
-    cursor.execute('CREATE TABLE books(name text, author text, read integer)')
+    cursor.execute('CREATE TABLE IF NOT EXISTS books(name text, author text, read integer)')
 
     connection.commit()
     connection.close()
@@ -29,24 +29,20 @@ def get_all_books():
     return books
 
 
-def _save_all_books(books):
-    with open(books_file, 'w') as file:
-        for book in books:
-            file.write(f"{book['name']},{book['author']},{book['read']}\n")
-
-
 def mark_book_as_read(name):
-    books = get_all_books()
-    for book in books:
-        if book['name'] == name:
-            book['read'] = 1
-    _save_all_books(books)
+    connection = sqlite3.connect('data.db')
+    cursor = connection.cursor()
+    cursor.execute('UPDATE books SET read=1 WHERE name=?',(name,)) # comma beside name is indicate its a tuple
+    connection.commit()
+    connection.close()
 
 
 def delete_book(name):
-    books = get_all_books()
-    books = [book for book in books if book['name'] != name]
-    _save_all_books(books)
+    connection = sqlite3.connect('data.db')
+    cursor = connection.cursor()
+    cursor.execute('DELETE FROM books  WHERE name=?',(name,)) # comma beside name is indicate its a tuple
+    connection.commit()
+    connection.close()
 
 
 # def delete_book(name):
